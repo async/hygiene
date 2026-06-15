@@ -33,10 +33,11 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
+    "hygiene:check": "pnpm run build && node dist/cli.js check",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "pnpm run build && node --test tests/*.test.js",
     "pack:check": "npm --cache .async/npm-cache pack --dry-run",
-    "release:check": "pnpm run build && pnpm run test && pnpm run pack:check"
+    "release:check": "pnpm run build && node --test tests/*.test.js && node dist/cli.js check && pnpm run pack:check"
   },
   "files": [
     "dist",
