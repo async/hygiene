@@ -26,6 +26,8 @@ test("loads typed hygiene.config.ts directly", async () => {
 test("rejects unknown config fields", () => {
   assert.throws(() => defineConfig({ toolz: true }), /unknown field "toolz"/);
   assert.throws(() => defineConfig({ targets: { packages: [{ path: ".", extra: true }] } }), /unknown field "extra"/);
+  assert.throws(() => defineConfig({ mode: "library" }), /Unknown hygiene mode "library"/);
+  assert.throws(() => defineConfig({ targets: { packages: [{ path: "../outside" }] } }), /path must stay inside the repository/);
 });
 
 test("detects app, package, and mixed modes", async () => {
@@ -56,6 +58,32 @@ test("runHygiene returns one combined report", async () => {
   assert.equal(report.mode, "app");
   assert.deepEqual(report.gates, []);
   assert.deepEqual(report.failures, []);
+});
+
+test("fixture projects report app, package, and mixed modes", async () => {
+  const app = await tempDir("hygiene-fixture-app-");
+  await writeFile(join(app, "package.json"), JSON.stringify({ private: true, type: "module" }));
+  assert.equal((await runHygiene({ cwd: app, config: { mode: "app", gates: [] } })).mode, "app");
+
+  const pkg = await tempDir("hygiene-fixture-package-");
+  await writeFile(join(pkg, "package.json"), JSON.stringify({ name: "@demo/pkg", version: "1.0.0", type: "module" }));
+  assert.equal((await runHygiene({ cwd: pkg, config: { mode: "package", gates: [], targets: { packages: [{ path: "." }] } } })).mode, "package");
+
+  const mixed = await tempDir("hygiene-fixture-mixed-");
+  await mkdir(join(mixed, "packages", "lib"), { recursive: true });
+  await writeFile(join(mixed, "package.json"), JSON.stringify({ private: true, type: "module" }));
+  await writeFile(join(mixed, "packages", "lib", "package.json"), JSON.stringify({ name: "@demo/lib", version: "1.0.0", type: "module" }));
+  assert.equal((await runHygiene({ cwd: mixed, config: { mode: "mixed", gates: [], targets: { packages: [{ path: "packages/lib" }] } } })).mode, "mixed");
+});
+
+test("mixed mode requires explicit targets", async () => {
+  const dir = await tempDir("hygiene-mixed-targets-");
+  await writeFile(join(dir, "package.json"), JSON.stringify({ private: true, type: "module" }));
+
+  await assert.rejects(
+    runHygiene({ cwd: dir, config: { mode: "mixed", gates: [] } }),
+    /mixed hygiene mode requires explicit app or package targets/
+  );
 });
 
 async function tempDir(prefix) {
