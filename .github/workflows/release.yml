@@ -88,7 +88,9 @@ jobs:
         run: pnpm run build
 
       - name: Read package version
-        run: echo "PACKAGE_VERSION=$(node -p \"JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version\")" >> "$GITHUB_ENV"
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "PACKAGE_VERSION=${version}" >> "$GITHUB_ENV"
 
       - name: Check existing npm package
         run: |
