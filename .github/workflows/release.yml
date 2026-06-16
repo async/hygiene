@@ -116,7 +116,9 @@ jobs:
 
       - name: Ensure npm package is public
         if: env.HAS_NPM_TOKEN == 'true'
-        run: npm access public @async/hygiene --registry=https://registry.npmjs.org
+        run: |
+          npm access set status=public @async/hygiene --registry=https://registry.npmjs.org
+          npm access get status @async/hygiene --registry=https://registry.npmjs.org
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
