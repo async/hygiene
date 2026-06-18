@@ -60,6 +60,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write
     env:
       HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
     steps:
@@ -101,6 +102,37 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check existing GitHub Packages mirror
+        run: |
+          github_npmrc="$(mktemp)"
+          trap 'rm -f "$github_npmrc"' EXIT
+          {
+            printf '@async:registry=https://npm.pkg.github.com\n'
+            printf '//npm.pkg.github.com/:_authToken=%s\n' "$GITHUB_TOKEN"
+          } > "$github_npmrc"
+
+          if NPM_CONFIG_USERCONFIG="$github_npmrc" npm view "@async/hygiene@${PACKAGE_VERSION}" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "GITHUB_PACKAGE_ALREADY_PUBLISHED=true" >> "$GITHUB_ENV"
+          else
+            echo "GITHUB_PACKAGE_ALREADY_PUBLISHED=false" >> "$GITHUB_ENV"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish GitHub Packages mirror
+        if: env.GITHUB_PACKAGE_ALREADY_PUBLISHED != 'true' && inputs.access_only != true
+        run: |
+          github_npmrc="$(mktemp)"
+          trap 'rm -f "$github_npmrc"' EXIT
+          {
+            printf '@async:registry=https://npm.pkg.github.com\n'
+            printf '//npm.pkg.github.com/:_authToken=%s\n' "$GITHUB_TOKEN"
+          } > "$github_npmrc"
+
+          NPM_CONFIG_USERCONFIG="$github_npmrc" npm publish --ignore-scripts --registry=https://npm.pkg.github.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish with npm token
         if: env.HAS_NPM_TOKEN == 'true' && env.PACKAGE_ALREADY_PUBLISHED != 'true' && inputs.access_only != true
