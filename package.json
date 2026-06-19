@@ -34,10 +34,31 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/cli.js",
     "hygiene:check": "pnpm run build && node dist/cli.js check",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "pnpm run build && node --test tests/*.test.js",
     "pack:check": "npm --cache .async/npm-cache pack --dry-run",
-    "release:check": "pnpm run build && node --test tests/*.test.js && node dist/cli.js check && pnpm run pack:check"
+    "pipeline:github:check": "async-pipeline github check",
+    "pipeline:github:generate": "async-pipeline github generate",
+    "pipeline:publish": "async-pipeline run publish",
+    "pipeline:publish:github:main": "async-pipeline publish github main --package .",
+    "pipeline:publish:github:release": "async-pipeline publish github release --package .",
+    "pipeline:publish:npm": "async-pipeline publish npm --package .",
+    "pipeline:release-doctor": "async-pipeline run release-doctor",
+    "pipeline:release:doctor": "async-pipeline release doctor --package .",
+    "pipeline:release:ensure": "async-pipeline release ensure --package .",
+    "pipeline:snapshot": "async-pipeline run snapshot",
+    "pipeline:sync:check": "async-pipeline sync check",
+    "pipeline:sync:generate": "async-pipeline sync generate",
+    "pipeline:task:build": "async-pipeline run-task build",
+    "pipeline:task:github.check": "async-pipeline run-task github.check",
+    "pipeline:task:hygiene": "async-pipeline run-task hygiene",
+    "pipeline:task:pack": "async-pipeline run-task pack",
+    "pipeline:task:release.doctor": "async-pipeline run-task release.doctor",
+    "pipeline:task:sync.check": "async-pipeline run-task sync.check",
+    "pipeline:task:test": "async-pipeline run-task test",
+    "pipeline:verify": "async-pipeline run verify",
+    "pipeline:verify:force": "async-pipeline run verify --force",
+    "release:check": "pnpm run pipeline:verify:force",
+    "test": "pnpm run build && node --test tests/*.test.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "files": [
     "dist",
@@ -57,6 +78,7 @@
     "publint": "0.3.21"
   },
   "devDependencies": {
+    "@async/pipeline": "0.9.23",
     "@types/node": "24.12.4",
     "typescript": "6.0.3"
   }

@@ -27,6 +27,9 @@ importers:
         specifier: 0.3.21
         version: 0.3.21
     devDependencies:
+      '@async/pipeline':
+        specifier: 0.9.23
+        version: 0.9.23
       '@types/node':
         specifier: 24.12.4
         version: 24.12.4
@@ -47,6 +50,11 @@ packages:
   '@arethetypeswrong/core@0.18.3':
     resolution: {integrity: sha512-sWBB/tdIktaT5xMq0Dz6CJyqcf6oMNdmiKiuPU1lWoJLTL6gjRSsksBuSgqot21hylkklBQY1wiSu+PkZhW7sw==}
     engines: {node: '>=20'}
+
+  '@async/pipeline@0.9.23':
+    resolution: {integrity: sha512-P/dNRgexK1ZzfFIGi3P/T7Oouhkywpyp0xUOaMJKKYfvZBgLtSnmXX+eSoYFv2aF57iAFOyK/BvM/34tUn5H8g==}
+    engines: {node: '>=24'}
+    hasBin: true
 
   '@braidai/lang@1.1.2':
     resolution: {integrity: sha512-qBcknbBufNHlui137Hft8xauQMTZDKdophmLFv05r2eNmdIv/MlPuP4TdUknHG68UdWLgVZwgxVe735HzJNIwA==}
@@ -811,6 +819,8 @@ snapshots:
       semver: 7.8.3
       typescript: 5.6.1-rc
       validate-npm-package-name: 5.0.1
+
+  '@async/pipeline@0.9.23': {}
 
   '@braidai/lang@1.1.2': {}
 
